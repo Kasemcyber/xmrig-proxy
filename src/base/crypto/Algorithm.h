@@ -79,6 +79,7 @@ public:
         RX_GRAFT        = 0x72151267,   // "rx/graft"         RandomGRAFT (Graft).
         RX_SFX          = 0x72151273,   // "rx/sfx"           RandomSFX (Safex Cash).
         RX_YADA         = 0x72151279,   // "rx/yada"          RandomYada (YadaCoin).
+        RX_C64          = 0x72141163,   // "rx/c64"           RandomC64 (C64 Chain).
         AR2_CHUKWA      = 0x61130000,   // "argon2/chukwa"    Argon2id (Chukwa).
         AR2_CHUKWA_V2   = 0x61140000,   // "argon2/chukwav2"  Argon2id (Chukwa v2).
         AR2_WRKZ        = 0x61120000,   // "argon2/wrkz"      Argon2id (WRKZ)
@@ -146,6 +147,7 @@ public:
     static const char *kRX_GRAFT;
     static const char *kRX_SFX;
     static const char *kRX_YADA;
+    static const char *kRX_C64;
 #   endif
 
 #   ifdef XMRIG_ALGO_ARGON2
@@ -176,9 +178,12 @@ public:
     static inline constexpr size_t l2(Id id)                { return family(id) == RANDOM_X ? (1U << ((id >> 8) & 0xff)) : 0U; }
     static inline constexpr size_t l3(Id id)                { return 1ULL << ((id >> 16) & 0xff); }
     static inline constexpr uint32_t family(Id id)          { return id & (isCN(id) ? 0xffff0000 : 0xff000000); }
+    static inline constexpr bool isCompat(Id a, Id b)       { return (a == b) || (family(a) == family(b) && family(a) == RANDOM_X && l2(a) == l2(b) && l3(a) == l3(b)); }
+    static inline bool isCompat(const Algorithm &a, const Algorithm &b) { return isCompat(a.m_id, b.m_id); }
 
     inline bool isCN() const                                { return isCN(m_id); }
     inline bool isEqual(const Algorithm &other) const       { return m_id == other.m_id; }
+    inline bool isCompat(const Algorithm &other) const       { return isCompat(m_id, other.m_id); }
     inline bool isValid() const                             { return m_id != INVALID && family() > UNKNOWN; }
     inline Id base() const                                  { return base(m_id); }
     inline Id id() const                                    { return m_id; }
